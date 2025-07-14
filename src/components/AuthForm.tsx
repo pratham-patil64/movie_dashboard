@@ -38,14 +38,14 @@ export default function AuthForm() {
   }, [navigate])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 px-4">
       <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-lg p-8 w-full max-w-sm animate-fade-in">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center text-primary mb-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center text-zinc-800 dark:text-white mb-6">
           {isLogin ? 'Welcome Back 👋' : 'Create Your Account 🎬'}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
-            className="w-full p-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition"
+            className="w-full p-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition"
             type="email"
             placeholder="Email"
             value={email}
@@ -53,7 +53,7 @@ export default function AuthForm() {
             required
           />
           <input
-            className="w-full p-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition"
+            className="w-full p-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition"
             type="password"
             placeholder="Password"
             value={password}
@@ -68,7 +68,7 @@ export default function AuthForm() {
             {loading ? <Loader2 className="animate-spin w-4 h-4" /> : isLogin ? 'Login' : 'Sign Up'}
           </button>
           <p
-            className="text-sm text-muted-foreground text-center cursor-pointer hover:underline"
+            className="text-sm text-zinc-600 dark:text-zinc-400 text-center cursor-pointer hover:underline"
             onClick={() => setIsLogin(!isLogin)}
           >
             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
