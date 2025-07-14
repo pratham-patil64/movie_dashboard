@@ -97,13 +97,13 @@ export function MovieDashboard() {
 
   // Share
   const shareCollection = () => {
-    const shareUrl = `${window.location.origin}${window.location.pathname}?view=only`;
-    navigator.clipboard.writeText(shareUrl);
-    toast({
-      title: "Link Copied!",
-      description: "Public view-only link copied to clipboard.",
-    });
-  };
+  const shareUrl = `${window.location.origin}/dashboard?view=only`;
+  navigator.clipboard.writeText(shareUrl);
+  toast({
+    title: "Link Copied!",
+    description: "Public view-only link copied to clipboard.",
+  });
+};
 
   // Group by genre
   const moviesByGenre = movies.reduce((acc, movie) => {
