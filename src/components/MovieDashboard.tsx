@@ -7,8 +7,7 @@ import { CategoryRow } from "./CategoryRow";
 import { Top10Section } from "./Top10Section";
 import { AddMovieModal } from "./AddMovieModal";
 import { supabase } from "@/lib/supabaseClient";
-import LogoutButton from "./LogoutButton"
-
+import LogoutButton from "./LogoutButton";
 
 interface Movie {
   id: string;
@@ -20,7 +19,7 @@ interface Movie {
   image: string;
   description: string;
   trailer_url: string;
-  type: 'movie' | 'series';
+  type: "movie" | "series";
   created_at?: string;
 }
 
@@ -32,50 +31,55 @@ export function MovieDashboard() {
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Fetch user and mode
+  // Fetch user and view/edit mode
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      setUserId(user?.id || null);
-
       const urlParams = new URLSearchParams(window.location.search);
-      const viewOnly = urlParams.get('view') === 'only';
-      setIsEditMode(user ? true : !viewOnly);
+      const viewOnly = urlParams.get("view") === "only";
+      const sharedUser = urlParams.get("user");
+
+      if (viewOnly && sharedUser) {
+        setUserId(sharedUser);
+        setIsEditMode(false); // Disable editing in shared view
+      } else {
+        setUserId(user?.id || null);
+        setIsEditMode(!!user);
+      }
     };
 
     fetchUser();
   }, []);
 
-  // Fetch movies
+  // Fetch movies for the current user
   const fetchMovies = async () => {
-  if (!userId) return;
+    if (!userId) return;
 
-  const { data, error } = await supabase
-    .from("movies")
-    .select("*")
-    .eq("user_id", userId)  // 🔥 Only fetch movies created by this user
-    .order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("movies")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Failed to fetch:", error);
-  } else {
-    setMovies(data);
-    const uniqueGenres = Array.from(new Set(data.map((m) => m.genre)));
-    setGenres(uniqueGenres);
-  }
-};
-
+    if (error) {
+      console.error("Failed to fetch:", error);
+    } else {
+      setMovies(data);
+      const uniqueGenres = Array.from(new Set(data.map((m) => m.genre)));
+      setGenres(uniqueGenres);
+    }
+  };
 
   useEffect(() => {
-    fetchMovies();
-  }, []);
+    if (userId) fetchMovies();
+  }, [userId]);
 
   // Add new movie
   const addMovie = async (movieData: Omit<Movie, "id" | "user_id">) => {
     if (!userId) return;
 
-    const { data, error } = await supabase.from("movies").insert([
-      { ...movieData, user_id: userId }
+    const { error } = await supabase.from("movies").insert([
+      { ...movieData, user_id: userId },
     ]);
 
     if (error) {
@@ -99,17 +103,17 @@ export function MovieDashboard() {
     }
   };
 
-  // Share
+  // Share collection link
   const shareCollection = () => {
-  const shareUrl = `${window.location.origin}/dashboard?view=only`;
-  navigator.clipboard.writeText(shareUrl);
-  toast({
-    title: "Link Copied!",
-    description: "Public view-only link copied to clipboard.",
-  });
-};
+    const shareUrl = `${window.location.origin}/dashboard?view=only&user=${userId}`;
+    navigator.clipboard.writeText(shareUrl);
+    toast({
+      title: "Link Copied!",
+      description: "Your public dashboard link was copied to clipboard.",
+    });
+  };
 
-  // Group by genre
+  // Organize by genre
   const moviesByGenre = movies.reduce((acc, movie) => {
     if (!acc[movie.genre]) acc[movie.genre] = [];
     acc[movie.genre].push(movie);
@@ -120,7 +124,7 @@ export function MovieDashboard() {
   const seriesList = movies.filter((m) => m.type === "series");
 
   const featuredMovie = movies.length > 0
-    ? movies.reduce((prev, current) => prev.rating > current.rating ? prev : current)
+    ? movies.reduce((prev, current) => (prev.rating > current.rating ? prev : current))
     : undefined;
 
   return (
@@ -128,50 +132,56 @@ export function MovieDashboard() {
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 border-b border-gray-800 gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-primary">My Cinema</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">Your personal movie & series collection</p>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Your personal movie & series collection
+          </p>
         </div>
 
-<div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-  {/* Toggle mode */}
-  <Button variant="outline" onClick={() => setIsEditMode(!isEditMode)} size="sm">
-    {isEditMode ? (
-      <>
-        <Eye className="w-4 h-4" /> View Mode
-      </>
-    ) : (
-      <>
-        <Edit3 className="w-4 h-4" /> Edit Mode
-      </>
-    )}
-  </Button>
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          {/* Toggle Mode Button */}
+          {!window.location.search.includes("view=only") && (
+            <Button variant="outline" onClick={() => setIsEditMode(!isEditMode)} size="sm">
+              {isEditMode ? (
+                <>
+                  <Eye className="w-4 h-4" /> View Mode
+                </>
+              ) : (
+                <>
+                  <Edit3 className="w-4 h-4" /> Edit Mode
+                </>
+              )}
+            </Button>
+          )}
 
-  {/* Share + Logout + Add */}
-  {userId && (
-    <>
-      <Button variant="outline" onClick={shareCollection} size="sm">
-        <Share2 className="w-4 h-4" /> Share
-      </Button>
+          {/* Share + Logout */}
+          {userId && (
+            <>
+              <Button variant="outline" onClick={shareCollection} size="sm">
+                <Share2 className="w-4 h-4" /> Share
+              </Button>
+              {isEditMode && <LogoutButton />}
+            </>
+          )}
 
-      <LogoutButton />
-    </>
-  )}
-
-  {isEditMode && userId && (
-    <Button onClick={() => setIsAddModalOpen(true)} size="sm">
-      <Plus className="w-4 h-4" /> Add
-    </Button>
-  )}
-</div>
+          {/* Add Button */}
+          {isEditMode && userId && (
+            <Button onClick={() => setIsAddModalOpen(true)} size="sm">
+              <Plus className="w-4 h-4" /> Add
+            </Button>
+          )}
+        </div>
       </header>
 
       <main className="p-4 sm:p-6">
         {featuredMovie && <HeroSection featuredMovie={featuredMovie} />}
+
         <Top10Section
           movies={moviesList}
           series={seriesList}
           onDeleteMovie={isEditMode ? deleteMovie : undefined}
           isEditable={isEditMode}
         />
+
         {Object.entries(moviesByGenre).map(([genre, list]) => (
           <CategoryRow
             key={genre}
@@ -181,6 +191,7 @@ export function MovieDashboard() {
             isEditable={isEditMode}
           />
         ))}
+
         {movies.length === 0 && (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">🎬</div>
@@ -197,6 +208,7 @@ export function MovieDashboard() {
         )}
       </main>
 
+      {/* Modal for adding movie */}
       <AddMovieModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
@@ -204,8 +216,6 @@ export function MovieDashboard() {
         existingGenres={genres}
         onAddGenre={() => {}}
       />
-
     </div>
-
   );
 }
