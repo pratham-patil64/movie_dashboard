@@ -30,6 +30,7 @@ export function MovieDashboard() {
   const [isEditMode, setIsEditMode] = useState(true);
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
+  const [isViewOnly, setIsViewOnly] = useState(false);
 
   // Fetch user and view/edit mode
   useEffect(() => {
@@ -41,17 +42,19 @@ export function MovieDashboard() {
 
       if (viewOnly && sharedUser) {
         setUserId(sharedUser);
+        setIsViewOnly(true);
         setIsEditMode(false); // Disable editing in shared view
       } else {
         setUserId(user?.id || null);
         setIsEditMode(!!user);
+        setIsViewOnly(false);
       }
     };
 
     fetchUser();
   }, []);
 
-  // Fetch movies for the current user
+  // Fetch movies for the current user or shared user
   const fetchMovies = async () => {
     if (!userId) return;
 
@@ -113,7 +116,6 @@ export function MovieDashboard() {
     });
   };
 
-  // Organize by genre
   const moviesByGenre = movies.reduce((acc, movie) => {
     if (!acc[movie.genre]) acc[movie.genre] = [];
     acc[movie.genre].push(movie);
@@ -138,8 +140,8 @@ export function MovieDashboard() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          {/* Toggle Mode Button */}
-          {!window.location.search.includes("view=only") && (
+          {/* Toggle Edit/View Mode */}
+          {!isViewOnly && (
             <Button variant="outline" onClick={() => setIsEditMode(!isEditMode)} size="sm">
               {isEditMode ? (
                 <>
@@ -159,7 +161,7 @@ export function MovieDashboard() {
               <Button variant="outline" onClick={shareCollection} size="sm">
                 <Share2 className="w-4 h-4" /> Share
               </Button>
-              {isEditMode && <LogoutButton />}
+              {!isViewOnly && isEditMode && <LogoutButton />}
             </>
           )}
 
@@ -208,7 +210,7 @@ export function MovieDashboard() {
         )}
       </main>
 
-      {/* Modal for adding movie */}
+      {/* Modal */}
       <AddMovieModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
