@@ -48,19 +48,23 @@ export function MovieDashboard() {
 
   // Fetch movies
   const fetchMovies = async () => {
-    const { data, error } = await supabase
-      .from("movies")
-      .select("*")
-      .order("created_at", { ascending: false });
+  if (!userId) return;
 
-    if (error) {
-      console.error("Failed to fetch:", error);
-    } else {
-      setMovies(data);
-      const uniqueGenres = Array.from(new Set(data.map((m) => m.genre)));
-      setGenres(uniqueGenres);
-    }
-  };
+  const { data, error } = await supabase
+    .from("movies")
+    .select("*")
+    .eq("user_id", userId)  // 🔥 Only fetch movies created by this user
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to fetch:", error);
+  } else {
+    setMovies(data);
+    const uniqueGenres = Array.from(new Set(data.map((m) => m.genre)));
+    setGenres(uniqueGenres);
+  }
+};
+
 
   useEffect(() => {
     fetchMovies();
