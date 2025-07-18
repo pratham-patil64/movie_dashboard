@@ -133,10 +133,10 @@ export default {
 				},
 				'glow': {
 					'0%, 100%': {
-						boxShadow: '0 0 20px hsl(var(--glow-red))'
+						boxShadow: '0 0 5px hsl(var(--glow-red))' // Adjusted for a softer glow
 					},
 					'50%': {
-						boxShadow: '0 0 40px hsl(var(--glow-red)), 0 0 60px hsl(var(--glow-red))'
+						boxShadow: '0 0 10px hsl(var(--glow-red)), 0 0 15px hsl(var(--glow-red))' // Adjusted for a softer glow
 					}
 				}
 			},

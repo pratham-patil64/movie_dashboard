@@ -131,15 +131,18 @@ export function MovieDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 border-b border-gray-800 gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary">My Cinema</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
+      <header className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-b border-gray-800 gap-4">
+        {/* Updated Title Section */}
+        <div className="flex flex-col items-center sm:items-start w-full sm:w-auto">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-primary mb-2 text-center sm:text-left animate-fade-in animate-glow">
+            WatchTime
+          </h1>
+          <p className="text-muted-foreground text-sm sm:text-base text-center sm:text-left">
             Your personal movie & series collection
           </p>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center sm:justify-end">
           {/* Toggle Edit/View Mode */}
           {!isViewOnly && (
             <Button variant="outline" onClick={() => setIsEditMode(!isEditMode)} size="sm">
