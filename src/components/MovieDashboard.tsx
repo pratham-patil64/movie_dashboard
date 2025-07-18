@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Eye, EyeOff, Share2, Edit3 } from "lucide-react";
+import { Plus, Eye, EyeOff, Share2, Edit3, Sparkles } from "lucide-react"; // Import Sparkles for the button
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { HeroSection } from "./HeroSection";
@@ -8,6 +8,7 @@ import { Top10Section } from "./Top10Section";
 import { AddMovieModal } from "./AddMovieModal";
 import { supabase } from "@/lib/supabaseClient";
 import LogoutButton from "./LogoutButton";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 interface Movie {
   id: string;
@@ -31,6 +32,7 @@ export function MovieDashboard() {
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
   const [isViewOnly, setIsViewOnly] = useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   // Fetch user and view/edit mode
   useEffect(() => {
@@ -158,6 +160,13 @@ export function MovieDashboard() {
             </Button>
           )}
 
+          {/* Recommendations Button */}
+          {!isViewOnly && ( // Only show if not in view-only mode
+            <Button variant="outline" onClick={() => navigate('/recommendations')} size="sm">
+              <Sparkles className="w-4 h-4" /> Recommendations
+            </Button>
+          )}
+
           {/* Share + Logout */}
           {userId && (
             <>
@@ -200,7 +209,7 @@ export function MovieDashboard() {
         {movies.length === 0 && (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">🎬</div>
-            <h2 className="text-2xl font-bold mb-4">Welcome to Your Cinema</h2>
+            <h2 className="text-2xl font-bold mb-4">Welcome to WatchTime</h2>
             <p className="text-muted-foreground mb-8 max-w-md mx-auto">
               Start building your personal movie and series collection.
             </p>

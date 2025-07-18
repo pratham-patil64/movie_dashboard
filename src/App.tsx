@@ -7,6 +7,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import AuthForm from "@/components/AuthForm";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import RecommendationsPage from "./pages/RecommendationsPage"; // Import the new page
 import { supabase } from "@/lib/supabaseClient";
 
 const queryClient = new QueryClient();
@@ -18,9 +19,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const check = async () => {
-      // Destructure session directly from data to resolve 'Cannot find name 'data'.' error
       const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthed(!!session); // Use 'session' directly
+      setIsAuthed(!!session);
       setLoading(false);
     };
     check();
@@ -49,6 +49,15 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Index />
+                </ProtectedRoute>
+              }
+            />
+            {/* New Route for Recommendations Page */}
+            <Route
+              path="/recommendations"
+              element={
+                <ProtectedRoute>
+                  <RecommendationsPage />
                 </ProtectedRoute>
               }
             />
