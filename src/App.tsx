@@ -18,8 +18,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const check = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthed(!!data.session);
+      // Destructure session directly from data to resolve 'Cannot find name 'data'.' error
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthed(!!session); // Use 'session' directly
       setLoading(false);
     };
     check();

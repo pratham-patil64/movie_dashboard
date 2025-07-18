@@ -1,6 +1,8 @@
-import { Trophy, Star, Play } from "lucide-react";
+import { Trophy, Star, Play, Info } from "lucide-react"; // Import Info icon
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useState } from "react"; // Import useState
+import { MovieDetailsModal } from "./MovieDetailsModal"; // Import the MovieDetailsModal
 
 interface Movie {
   id: string;
@@ -11,7 +13,7 @@ interface Movie {
   image: string;
   description: string;
   type: 'movie' | 'series';
-  trailer_url?: string; // ✅ Add this field
+  trailer_url?: string;
 }
 
 interface Top10SectionProps {
@@ -32,74 +34,96 @@ function Top10Item({
   onDelete?: (id: string) => void;
   isEditable?: boolean;
 }) {
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // State for modal visibility
+
   const handlePlay = () => {
     if (movie.trailer_url) {
       window.open(movie.trailer_url, "_blank");
     } else {
-      alert("Trailer not available.");
+      // In a real application, you'd use a custom modal or toast here
+      console.log("Trailer not available.");
     }
   };
 
   return (
-    <Card className="flex items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-card-gradient border-0 hover:bg-secondary/50 transition-colors group">
-      {/* Rank */}
-      <div className="text-2xl sm:text-4xl font-bold text-primary flex-shrink-0 w-8 sm:w-12">
-        {rank}
-      </div>
-
-      {/* Poster */}
-      <div className="w-12 h-18 sm:w-16 sm:h-24 rounded-md overflow-hidden flex-shrink-0">
-        <img
-          src={movie.image}
-          alt={movie.title}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = `https://via.placeholder.com/64x96/e50914/ffffff?text=${rank}`;
-          }}
-        />
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1 sm:gap-2 mb-1">
-          <h3 className="font-semibold text-sm sm:text-base truncate">{movie.title}</h3>
-          <span className="bg-primary px-1 sm:px-2 py-0.5 rounded text-xs uppercase flex-shrink-0">
-            {movie.type}
-          </span>
+    <>
+      <Card className="flex items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-card-gradient border-0 hover:bg-secondary/50 transition-colors group">
+        {/* Rank */}
+        <div className="text-2xl sm:text-4xl font-bold text-primary flex-shrink-0 w-8 sm:w-12">
+          {rank}
         </div>
-        <p className="text-xs sm:text-sm text-muted-foreground mb-1">
-          {movie.year} • {movie.genre}
-        </p>
-        <div className="flex items-center gap-1">
-          <Star className="w-3 h-3 text-yellow-400 fill-current" />
-          <span className="text-xs sm:text-sm">{movie.rating}</span>
-        </div>
-      </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-        <Button
-          size="sm"
-          className="opacity-0 group-hover:opacity-100 transition-opacity text-xs sm:text-sm"
-          onClick={handlePlay}
-        >
-          <Play className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="hidden sm:inline ml-1">Play</span>
-        </Button>
-        {isEditable && onDelete && (
+        {/* Poster */}
+        <div className="w-12 h-18 sm:w-16 sm:h-24 rounded-md overflow-hidden flex-shrink-0">
+          <img
+            src={movie.image}
+            alt={movie.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = `https://placehold.co/64x96/e50914/ffffff?text=${rank}`;
+            }}
+          />
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1 sm:gap-2 mb-1">
+            <h3 className="font-semibold text-sm sm:text-base truncate">{movie.title}</h3>
+            <span className="bg-primary px-1 sm:px-2 py-0.5 rounded text-xs uppercase flex-shrink-0">
+              {movie.type}
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">
+            {movie.year} • {movie.genre}
+          </p>
+          <div className="flex items-center gap-1">
+            <Star className="w-3 h-3 text-yellow-400 fill-current" />
+            <span className="text-xs sm:text-sm">{movie.rating}</span>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <Button
             size="sm"
-            variant="destructive"
             className="opacity-0 group-hover:opacity-100 transition-opacity text-xs sm:text-sm"
-            onClick={() => onDelete(movie.id)}
+            onClick={handlePlay}
           >
-            <span className="hidden sm:inline">Remove</span>
-            <span className="sm:hidden">×</span>
+            <Play className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline ml-1">Play</span>
           </Button>
-        )}
-      </div>
-    </Card>
+          {/* New "More Info" button */}
+          <Button
+            size="sm"
+            variant="secondary"
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-xs sm:text-sm"
+            onClick={() => setIsDetailsModalOpen(true)} // Open the details modal
+          >
+            <Info className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline ml-1">Info</span>
+          </Button>
+          {isEditable && onDelete && (
+            <Button
+              size="sm"
+              variant="destructive"
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-xs sm:text-sm"
+              onClick={() => onDelete(movie.id)}
+            >
+              <span className="hidden sm:inline">Remove</span>
+              <span className="sm:hidden">×</span>
+            </Button>
+          )}
+        </div>
+      </Card>
+
+      {/* Movie Details Modal for the current item */}
+      <MovieDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        movie={movie}
+      />
+    </>
   );
 }
 
