@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Eye, EyeOff, Share2, Edit3, Sparkles } from "lucide-react"; // Import Sparkles for the button
+import { Plus, Eye, Share2, Edit3, Sparkles, LogOut } from "lucide-react"; // Import LogOut for consistency
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { HeroSection } from "./HeroSection";
@@ -7,7 +7,7 @@ import { CategoryRow } from "./CategoryRow";
 import { Top10Section } from "./Top10Section";
 import { AddMovieModal } from "./AddMovieModal";
 import { supabase } from "@/lib/supabaseClient";
-import LogoutButton from "./LogoutButton";
+import LogoutButton from "./LogoutButton"; // Keep LogoutButton for its functionality
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 interface Movie {
@@ -144,44 +144,66 @@ export function MovieDashboard() {
           </p>
         </div>
 
+        {/* Professional Button Group */}
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center sm:justify-end">
           {/* Toggle Edit/View Mode */}
           {!isViewOnly && (
-            <Button variant="outline" onClick={() => setIsEditMode(!isEditMode)} size="sm">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditMode(!isEditMode)}
+              size="sm"
+              className="rounded-full px-4 py-2 text-sm transition-all duration-200 hover:scale-105"
+            >
               {isEditMode ? (
                 <>
-                  <Eye className="w-4 h-4" /> View Mode
+                  <Eye className="w-4 h-4 mr-1" /> View Mode
                 </>
               ) : (
                 <>
-                  <Edit3 className="w-4 h-4" /> Edit Mode
+                  <Edit3 className="w-4 h-4 mr-1" /> Edit Mode
                 </>
               )}
             </Button>
           )}
 
           {/* Recommendations Button */}
-          {!isViewOnly && ( // Only show if not in view-only mode
-            <Button variant="outline" onClick={() => navigate('/recommendations')} size="sm">
-              <Sparkles className="w-4 h-4" /> Recommendations
+          {!isViewOnly && (
+            <Button
+              variant="outline"
+              onClick={() => navigate('/recommendations')}
+              size="sm"
+              className="rounded-full px-4 py-2 text-sm transition-all duration-200 hover:scale-105"
+            >
+              <Sparkles className="w-4 h-4 mr-1" /> Recommendations
             </Button>
           )}
 
-          {/* Share + Logout */}
+          {/* Share Button */}
           {userId && (
-            <>
-              <Button variant="outline" onClick={shareCollection} size="sm">
-                <Share2 className="w-4 h-4" /> Share
-              </Button>
-              {!isViewOnly && isEditMode && <LogoutButton />}
-            </>
+            <Button
+              variant="outline"
+              onClick={shareCollection}
+              size="sm"
+              className="rounded-full px-4 py-2 text-sm transition-all duration-200 hover:scale-105"
+            >
+              <Share2 className="w-4 h-4 mr-1" /> Share
+            </Button>
           )}
 
           {/* Add Button */}
           {isEditMode && userId && (
-            <Button onClick={() => setIsAddModalOpen(true)} size="sm">
-              <Plus className="w-4 h-4" /> Add
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
+              size="sm"
+              className="rounded-full px-4 py-2 text-sm transition-all duration-200 hover:scale-105 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="w-4 h-4 mr-1" /> Add
             </Button>
+          )}
+
+          {/* Logout Button (moved to last) */}
+          {userId && !isViewOnly && isEditMode && (
+            <LogoutButton className="rounded-full px-4 py-2 text-sm transition-all duration-200 hover:scale-105" />
           )}
         </div>
       </header>
@@ -215,7 +237,7 @@ export function MovieDashboard() {
             </p>
             {isEditMode && (
               <Button onClick={() => setIsAddModalOpen(true)} size="lg">
-                <Plus className="w-5 h-5" /> Add Your First Movie
+                <Plus className="w-5 h-5 mr-2" /> Add Your First Movie
               </Button>
             )}
           </div>
