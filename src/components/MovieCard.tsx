@@ -21,7 +21,7 @@ interface MovieCardProps {
   movie: Movie;
   onDelete?: (id: string) => void;
   isEditable?: boolean;
-  ownerUserId?: string | null; // Added ownerUserId to MovieCardProps
+  ownerUserId?: string | null; // Pass ownerUserId to MovieCard
 }
 
 export function MovieCard({ movie, onDelete, isEditable = false, ownerUserId }: MovieCardProps) {
@@ -50,13 +50,13 @@ export function MovieCard({ movie, onDelete, isEditable = false, ownerUserId }: 
 
           {/* Overlay on hover */}
           <div
-            className={`absolute inset-0 bg-black/60 flex items-center justify-center transition-opacity duration-300 ${
+            className={`absolute inset-0 bg-black/60 flex flex-wrap items-center justify-center p-2 gap-1 sm:gap-2 transition-opacity duration-300 ${ // Added flex-wrap, p-2, gap-1/sm:gap-2
               isHovered ? "opacity-100" : "opacity-0"
             }`}
           >
             <Button
               size="sm"
-              className="mr-1 sm:mr-2 text-xs"
+              className="text-xs flex-shrink-0" // Added flex-shrink-0
               onClick={(e) => {
                 e.stopPropagation();
                 if (movie.trailer_url) {
@@ -74,7 +74,7 @@ export function MovieCard({ movie, onDelete, isEditable = false, ownerUserId }: 
               <Button
                 size="sm"
                 variant="secondary"
-                className="text-xs mr-1 sm:mr-2"
+                className="text-xs flex-shrink-0" // Added flex-shrink-0
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsWatchTogetherModalOpen(true);
@@ -88,7 +88,7 @@ export function MovieCard({ movie, onDelete, isEditable = false, ownerUserId }: 
             <Button
               size="sm"
               variant="secondary"
-              className="text-xs"
+              className="text-xs flex-shrink-0" // Added flex-shrink-0
               onClick={(e) => {
                 e.stopPropagation();
                 setIsDetailsModalOpen(true);
