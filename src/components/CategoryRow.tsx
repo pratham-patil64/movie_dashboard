@@ -12,6 +12,7 @@ interface Movie {
   image: string;
   description: string;
   type: 'movie' | 'series';
+  trailer_url?: string;
 }
 
 interface CategoryRowProps {
@@ -19,9 +20,10 @@ interface CategoryRowProps {
   movies: Movie[];
   onDeleteMovie?: (id: string) => void;
   isEditable?: boolean;
+  ownerUserId?: string | null; // Pass ownerUserId to CategoryRow
 }
 
-export function CategoryRow({ title, movies, onDeleteMovie, isEditable = false }: CategoryRowProps) {
+export function CategoryRow({ title, movies, onDeleteMovie, isEditable = false, ownerUserId }: CategoryRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -81,6 +83,7 @@ export function CategoryRow({ title, movies, onDeleteMovie, isEditable = false }
               movie={movie}
               onDelete={onDeleteMovie}
               isEditable={isEditable}
+              ownerUserId={ownerUserId} // Pass ownerUserId
             />
           </div>
         ))}

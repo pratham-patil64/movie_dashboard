@@ -1,8 +1,9 @@
-import { Trophy, Star, Play, Info } from "lucide-react"; // Import Info icon
+import { Trophy, Star, Play, Info, Users } from "lucide-react"; // Import Users icon
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState } from "react"; // Import useState
-import { MovieDetailsModal } from "./MovieDetailsModal"; // Import the MovieDetailsModal
+import { useState } from "react";
+import { MovieDetailsModal } from "./MovieDetailsModal";
+import { WatchTogetherModal } from "./WatchTogetherModal"; // Import WatchTogetherModal
 
 interface Movie {
   id: string;
@@ -21,26 +22,29 @@ interface Top10SectionProps {
   series: Movie[];
   onDeleteMovie?: (id: string) => void;
   isEditable?: boolean;
+  ownerUserId?: string | null; // Added ownerUserId to Top10SectionProps
 }
 
 function Top10Item({
   movie,
   rank,
   onDelete,
-  isEditable
+  isEditable,
+  ownerUserId // Receive ownerUserId
 }: {
   movie: Movie;
   rank: number;
   onDelete?: (id: string) => void;
   isEditable?: boolean;
+  ownerUserId?: string | null;
 }) {
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // State for modal visibility
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isWatchTogetherModalOpen, setIsWatchTogetherModalOpen] = useState(false); // State for Watch Together modal
 
   const handlePlay = () => {
     if (movie.trailer_url) {
       window.open(movie.trailer_url, "_blank");
     } else {
-      // In a real application, you'd use a custom modal or toast here
       console.log("Trailer not available.");
     }
   };
@@ -93,12 +97,22 @@ function Top10Item({
             <Play className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline ml-1">Play</span>
           </Button>
-          {/* New "More Info" button */}
+          {ownerUserId && ( // Only show if an ownerUserId is provided (i.e., it's a shared dashboard)
+            <Button
+              size="sm"
+              variant="secondary"
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-xs sm:text-sm"
+              onClick={() => setIsWatchTogetherModalOpen(true)}
+            >
+              <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline ml-1">Watch</span>
+            </Button>
+          )}
           <Button
             size="sm"
             variant="secondary"
             className="opacity-0 group-hover:opacity-100 transition-opacity text-xs sm:text-sm"
-            onClick={() => setIsDetailsModalOpen(true)} // Open the details modal
+            onClick={() => setIsDetailsModalOpen(true)}
           >
             <Info className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline ml-1">Info</span>
@@ -122,7 +136,18 @@ function Top10Item({
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         movie={movie}
+        ownerUserId={ownerUserId} // Pass ownerUserId
       />
+
+      {/* Watch Together Modal */}
+      {ownerUserId && (
+        <WatchTogetherModal
+          isOpen={isWatchTogetherModalOpen}
+          onClose={() => setIsWatchTogetherModalOpen(false)}
+          movie={{ id: movie.id, title: movie.title, image: movie.image }}
+          ownerUserId={ownerUserId}
+        />
+      )}
     </>
   );
 }
@@ -131,7 +156,8 @@ export function Top10Section({
   movies,
   series,
   onDeleteMovie,
-  isEditable = false
+  isEditable = false,
+  ownerUserId // Receive ownerUserId
 }: Top10SectionProps) {
   const top10Movies = [...movies].sort((a, b) => b.rating - a.rating).slice(0, 10);
   const top10Series = [...series].sort((a, b) => b.rating - a.rating).slice(0, 10);
@@ -161,6 +187,7 @@ export function Top10Section({
                     rank={index + 1}
                     onDelete={onDeleteMovie}
                     isEditable={isEditable}
+                    ownerUserId={ownerUserId} // Pass ownerUserId
                   />
                 </div>
               ))}
@@ -184,6 +211,7 @@ export function Top10Section({
                     rank={index + 1}
                     onDelete={onDeleteMovie}
                     isEditable={isEditable}
+                    ownerUserId={ownerUserId} // Pass ownerUserId
                   />
                 </div>
               ))}

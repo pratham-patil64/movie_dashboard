@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Star, Play, Plus, Info } from "lucide-react"; // Import Info icon
+import { Star, Play, Plus, Info, Users } from "lucide-react"; // Import Users icon
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { MovieDetailsModal } from "./MovieDetailsModal"; // Import the new modal
+import { MovieDetailsModal } from "./MovieDetailsModal";
+import { WatchTogetherModal } from "./WatchTogetherModal"; // Import WatchTogetherModal
 
 interface Movie {
   id: string;
@@ -20,11 +21,13 @@ interface MovieCardProps {
   movie: Movie;
   onDelete?: (id: string) => void;
   isEditable?: boolean;
+  ownerUserId?: string | null; // Added ownerUserId to MovieCardProps
 }
 
-export function MovieCard({ movie, onDelete, isEditable = false }: MovieCardProps) {
+export function MovieCard({ movie, onDelete, isEditable = false, ownerUserId }: MovieCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // State for modal visibility
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isWatchTogetherModalOpen, setIsWatchTogetherModalOpen] = useState(false); // State for Watch Together modal
 
   return (
     <>
@@ -59,7 +62,6 @@ export function MovieCard({ movie, onDelete, isEditable = false }: MovieCardProp
                 if (movie.trailer_url) {
                   window.open(movie.trailer_url, "_blank");
                 } else {
-                  // In a real application, you'd use a custom modal or toast here
                   console.log("Trailer not available.");
                 }
               }}
@@ -67,14 +69,29 @@ export function MovieCard({ movie, onDelete, isEditable = false }: MovieCardProp
               <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
               <span className="hidden sm:inline">Play</span>
             </Button>
-            {/* New "More Info" button */}
+            {/* New "Watch Together" button */}
+            {ownerUserId && ( // Only show if an ownerUserId is provided (i.e., it's a shared dashboard)
+              <Button
+                size="sm"
+                variant="secondary"
+                className="text-xs mr-1 sm:mr-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsWatchTogetherModalOpen(true);
+                }}
+              >
+                <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
+                <span className="hidden sm:inline">Watch</span>
+              </Button>
+            )}
+            {/* "More Info" button */}
             <Button
               size="sm"
               variant="secondary"
               className="text-xs"
               onClick={(e) => {
-                e.stopPropagation(); // Prevent card click from propagating
-                setIsDetailsModalOpen(true); // Open the details modal
+                e.stopPropagation();
+                setIsDetailsModalOpen(true);
               }}
             >
               <Info className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
@@ -129,7 +146,18 @@ export function MovieCard({ movie, onDelete, isEditable = false }: MovieCardProp
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         movie={movie}
+        ownerUserId={ownerUserId} // Pass ownerUserId
       />
+
+      {/* Watch Together Modal */}
+      {ownerUserId && (
+        <WatchTogetherModal
+          isOpen={isWatchTogetherModalOpen}
+          onClose={() => setIsWatchTogetherModalOpen(false)}
+          movie={{ id: movie.id, title: movie.title, image: movie.image }}
+          ownerUserId={ownerUserId}
+        />
+      )}
     </>
   );
 }

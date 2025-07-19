@@ -18,9 +18,10 @@ interface Movie {
 
 interface HeroSectionProps {
   featuredMovie?: Movie;
+  ownerUserId?: string | null; // Added ownerUserId to HeroSectionProps
 }
 
-export function HeroSection({ featuredMovie }: HeroSectionProps) {
+export function HeroSection({ featuredMovie, ownerUserId }: HeroSectionProps) {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // State for modal visibility
 
   const defaultMovie: Movie = {
@@ -125,6 +126,7 @@ export function HeroSection({ featuredMovie }: HeroSectionProps) {
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         movie={movie}
+        ownerUserId={ownerUserId} // Pass ownerUserId
       />
     </>
   );

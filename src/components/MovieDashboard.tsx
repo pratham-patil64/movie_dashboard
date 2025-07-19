@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Eye, Share2, Edit3, Sparkles, LogOut } from "lucide-react"; // Import LogOut for consistency
+import { Plus, Eye, Share2, Edit3, Sparkles, Users } from "lucide-react"; // Import Users for Watch Requests button
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { HeroSection } from "./HeroSection";
@@ -7,8 +7,10 @@ import { CategoryRow } from "./CategoryRow";
 import { Top10Section } from "./Top10Section";
 import { AddMovieModal } from "./AddMovieModal";
 import { supabase } from "@/lib/supabaseClient";
-import LogoutButton from "./LogoutButton"; // Keep LogoutButton for its functionality
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import LogoutButton from "./LogoutButton";
+import { useNavigate } from "react-router-dom";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"; // Import Sheet components
+import { WatchRequestsSection } from "./WatchRequestsSection"; // Import WatchRequestsSection
 
 interface Movie {
   id: string;
@@ -32,7 +34,7 @@ export function MovieDashboard() {
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
   const [isViewOnly, setIsViewOnly] = useState(false);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   // Fetch user and view/edit mode
   useEffect(() => {
@@ -40,14 +42,14 @@ export function MovieDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       const urlParams = new URLSearchParams(window.location.search);
       const viewOnly = urlParams.get("view") === "only";
-      const sharedUser = urlParams.get("user");
+      const sharedUser = urlParams.get("user"); // This is the owner's user ID from the URL
 
       if (viewOnly && sharedUser) {
-        setUserId(sharedUser);
+        setUserId(sharedUser); // In view-only, userId is the owner's ID
         setIsViewOnly(true);
         setIsEditMode(false); // Disable editing in shared view
       } else {
-        setUserId(user?.id || null);
+        setUserId(user?.id || null); // Otherwise, userId is the logged-in user's ID
         setIsEditMode(!!user);
         setIsViewOnly(false);
       }
@@ -109,8 +111,16 @@ export function MovieDashboard() {
   };
 
   // Share collection link
-  const shareCollection = () => {
-    const shareUrl = `${window.location.origin}/dashboard?view=only&user=${userId}`;
+  const shareCollection = async () => { // Made async to await getUser()
+    const { data: { user } } = await supabase.auth.getUser(); // Get current logged-in user
+    const currentOwnerId = new URLSearchParams(window.location.search).get("user") || user?.id; // Corrected: Use user?.id
+
+    if (!currentOwnerId) {
+      toast({title: "Error", description: "Could not determine owner ID for sharing.", variant: "destructive"});
+      return;
+    }
+
+    const shareUrl = `${window.location.origin}/dashboard?view=only&user=${currentOwnerId}`;
     navigator.clipboard.writeText(shareUrl);
     toast({
       title: "Link Copied!",
@@ -130,6 +140,12 @@ export function MovieDashboard() {
   const featuredMovie = movies.length > 0
     ? movies.reduce((prev, current) => (prev.rating > current.rating ? prev : current))
     : undefined;
+
+  // Determine the ownerUserId to pass to MovieCard/MovieDetailsModal
+  // If in view-only mode, the owner is the 'user' from the URL.
+  // If in edit mode, the owner is the currently logged-in user.
+  const currentDashboardOwnerId = isViewOnly ? new URLSearchParams(window.location.search).get("user") : userId;
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -179,7 +195,7 @@ export function MovieDashboard() {
           )}
 
           {/* Share Button */}
-          {userId && (
+          {userId && ( // Only show share button if a user is logged in (i.e., not a totally anonymous view)
             <Button
               variant="outline"
               onClick={shareCollection}
@@ -188,6 +204,27 @@ export function MovieDashboard() {
             >
               <Share2 className="w-4 h-4 mr-1" /> Share
             </Button>
+          )}
+
+          {/* Watch Requests Button (only for logged-in users who own the dashboard) */}
+          {userId && !isViewOnly && (
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full px-4 py-2 text-sm transition-all duration-200 hover:scale-105"
+                >
+                  <Users className="w-4 h-4 mr-1" /> Requests
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-full sm:w-[450px] bg-card border-gray-700">
+                <SheetHeader>
+                  <SheetTitle className="text-xl">Incoming Watch Requests</SheetTitle>
+                </SheetHeader>
+                {userId && <WatchRequestsSection ownerUserId={userId} />}
+              </SheetContent>
+            </Sheet>
           )}
 
           {/* Add Button */}
@@ -209,13 +246,14 @@ export function MovieDashboard() {
       </header>
 
       <main className="p-4 sm:p-6">
-        {featuredMovie && <HeroSection featuredMovie={featuredMovie} />}
+        {featuredMovie && <HeroSection featuredMovie={featuredMovie} ownerUserId={currentDashboardOwnerId} />}
 
         <Top10Section
           movies={moviesList}
           series={seriesList}
           onDeleteMovie={isEditMode ? deleteMovie : undefined}
           isEditable={isEditMode}
+          ownerUserId={currentDashboardOwnerId} // Pass ownerUserId
         />
 
         {Object.entries(moviesByGenre).map(([genre, list]) => (
@@ -225,6 +263,7 @@ export function MovieDashboard() {
             movies={list}
             onDeleteMovie={isEditMode ? deleteMovie : undefined}
             isEditable={isEditMode}
+            ownerUserId={currentDashboardOwnerId} // Pass ownerUserId
           />
         ))}
 
