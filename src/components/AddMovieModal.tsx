@@ -298,8 +298,9 @@ export function AddMovieModal({
                   id="title"
                   value={searchQuery}
                   onChange={handleSearchChange}
+                  // Increased timeout to 300ms for better clickability
                   onFocus={() => setShowSearchResults(true)}
-                  onBlur={() => setTimeout(() => setShowSearchResults(false), 100)} // Delay hiding to allow click
+                  onBlur={() => setTimeout(() => setShowSearchResults(false), 300)} 
                   placeholder="Search for a movie or series..."
                   className="text-sm pr-10"
                   required
