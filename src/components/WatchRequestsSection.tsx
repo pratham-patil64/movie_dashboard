@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils"; // Import cn utility
 
 interface WatchRequest {
   id: string;
@@ -109,7 +110,11 @@ export function WatchRequestsSection({ ownerUserId }: WatchRequestsSectionProps)
     <ScrollArea className="h-[calc(100vh-100px)]"> {/* Adjust height as needed */}
       <div className="p-4 grid gap-4">
         {requests.map((request) => (
-          <Card key={request.id} className="bg-secondary border-gray-700">
+          <Card key={request.id} className={cn(
+            "bg-secondary border-gray-700 transition-all duration-300",
+            request.status === 'accepted' ? "border-green-500 shadow-lg" : "",
+            request.status === 'declined' ? "opacity-70 border-red-500" : ""
+          )}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-semibold">{request.movie_title}</CardTitle>
               {request.status === 'pending' && (
@@ -135,13 +140,22 @@ export function WatchRequestsSection({ ownerUserId }: WatchRequestsSectionProps)
                   target.src = `https://placehold.co/80x120/e50914/ffffff?text=${encodeURIComponent(request.movie_title)}`;
                 }} />
                 <div>
-                  <CardDescription className="mb-1">From: {request.requester_email}</CardDescription>
-                  <CardDescription className="mb-2">Date: {format(new Date(request.scheduled_date), "PPP")}</CardDescription>
-                  {request.status === 'pending' && (
-                    <div className="flex gap-2 mt-2">
-                      <Button size="sm" onClick={() => handleStatusUpdate(request.id, 'accepted')}>Accept</Button>
-                      <Button size="sm" variant="outline" onClick={() => handleStatusUpdate(request.id, 'declined')}>Decline</Button>
-                    </div>
+                  {request.status === 'accepted' ? (
+                    <>
+                      <p className="text-sm text-green-400 font-medium mb-1">Request Accepted!</p>
+                      <p className="text-sm text-muted-foreground">Watching on: <span className="font-semibold text-foreground">{format(new Date(request.scheduled_date), "PPP")}</span></p>
+                    </>
+                  ) : (
+                    <>
+                      <CardDescription className="mb-1">From: {request.requester_email}</CardDescription>
+                      <CardDescription className="mb-2">Date: {format(new Date(request.scheduled_date), "PPP")}</CardDescription>
+                      {request.status === 'pending' && (
+                        <div className="flex gap-2 mt-2">
+                          <Button size="sm" onClick={() => handleStatusUpdate(request.id, 'accepted')}>Accept</Button>
+                          <Button size="sm" variant="outline" onClick={() => handleStatusUpdate(request.id, 'declined')}>Decline</Button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
